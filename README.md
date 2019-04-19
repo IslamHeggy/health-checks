@@ -12,6 +12,6 @@ It checks the memory, disk, cpu and applications urls on different servers and n
 
 
 ## How to use? 
-* Adjust Ansible Hosts file and healthcheck variables according to your need.
+* Adjust Ansible Hosts file and health check variables according to your need.
 * Adjust the smtp and add the e-mails that will receive the summary.
 
