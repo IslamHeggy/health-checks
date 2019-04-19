@@ -1,4 +1,4 @@
- health_checks
+ health-checks
  ================
 This Ansible playbook creates a bunch of health checks and generates periodic reports.
 
