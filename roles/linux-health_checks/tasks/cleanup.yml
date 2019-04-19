@@ -1,0 +1,14 @@
+---
+
+- name: delete the previous local period summary
+  file:
+    path: "{{ logs_path }}/{{ environment_var }}/{{ app_log }}/periodic_summary/summary.log" 
+    state: absent
+  delegate_to: localhost
+  tags: clean
+
+- name: delete the previous period summary
+  file:
+    path: "{{ logs_path }}/{{ app_log }}/periodic_summary/summary.log"
+    state: absent
+  tags: clean

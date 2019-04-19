@@ -1,0 +1,17 @@
+---
+
+- name: create log directory
+  file:
+     path: "{{ logs_path }}/{{ app_log }}/{{ item }}"
+     state: directory
+  with_items:
+       - "{{ logs_list }}"
+  tags: create
+
+- name: create first time log files
+  shell: 'touch  "{{ logs_path }}/{{ app_log }}/{{ item }}/{{ hostname.stdout }}_$(date +"%d_%m_%y").log"'  
+  with_items:
+       - "{{ logs_list }}"
+  tags: create
+
+

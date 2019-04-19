@@ -1,0 +1,6 @@
+--- 
+
+- name: get machine hostname 
+  shell: hostnamectl --static | cut -d'.' -f1
+  register: hostname
+  tags: host

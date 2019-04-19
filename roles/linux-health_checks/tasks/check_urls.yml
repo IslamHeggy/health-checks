@@ -1,0 +1,34 @@
+--- 
+- name: get the URLs
+  shell: curl -is "{{ url_check }}" | head -1 | cut -d' ' -f2
+  register: url_stats
+  ignore_errors: yes
+
+- name: echo unresponsive urls in a new file 
+  shell: |
+    'echo {{ app_log }} url is not responding on $(date) >> {{ logs_path }}/{{ app_log }}/{{ log_type }}/{{ hostname.stdout }}_$(date +"%d_%m_%Y").log'
+    echo "{{ app_log }}" url is not responding on $(date) "(ERROR)" >>  {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (url_stats.stdout|int != 200 and url_stats.stdout|int != 301 and url_stats.stdout|int != 401) and (last_date.stdout != curr_date.stdout)
+
+- name: echo responsive urls in a new file 
+  shell: |
+    'echo {{ app_log }} url is responding on $(date) >> {{ logs_path }}/{{ app_log }}/{{ log_type }}/{{ hostname.stdout }}_$(date +"%d_%m_%Y").log'
+    echo "{{ app_log }}" url is  responding on $(date) "(OKAY)" >>  {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (url_stats.stdout|int == 200 or url_stats.stdout|int == 301 or url_stats.stdout|int == 401) and (last_date.stdout != curr_date.stdout)
+
+
+- name: echo unresponsive urls in the same file 
+  shell: |
+     echo "{{ app_log }}" url is not responding on $(date) >> "{{ latest_file.path }}"
+     echo "{{ app_log }}" url is not responding on $(date) "(ERROR)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (url_stats.stdout|int != 200 and url_stats.stdout|int != 301 and url_stats.stdout|int != 401) and (last_date.stdout == curr_date.stdout)
+
+- name: echo responsive urls in the same file 
+  shell: |
+     echo "{{ app_log }}" url is  responding on $(date) >> "{{ latest_file.path }}"
+     echo "{{ app_log }}" url is  responding on $(date) "(OKAY)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (url_stats.stdout|int == 200 or url_stats.stdout|int == 301 or url_stats.stdout|int == 401) and (last_date.stdout == curr_date.stdout)
+
+
+
+

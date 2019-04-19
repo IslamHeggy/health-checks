@@ -1,0 +1,20 @@
+---
+- name: Get files in a folder
+  find:
+    paths: "{{ logs_path }}/{{ app_log }}/{{ log_type }}"
+  register: found_files
+
+- name: Get latest modifed file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+- name: get the current day  
+  command: date +"%d"
+  register: curr_date
+
+- name: get the day of the last modfied file
+  shell: "stat -c %y {{ latest_file.path }} | cut -d' ' -f1 | cut -d'-' -f3 "
+  register: last_date
+  ignore_errors: yes 
+
+

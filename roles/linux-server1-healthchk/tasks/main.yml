@@ -1,0 +1,103 @@
+---
+################
+# Naming
+################
+
+- include: ../../linux-health_checks/tasks/get_hostname.yml
+
+################
+# Initiation
+################
+- include: ../../linux-health_checks/tasks/onetime_run.yml
+  vars:
+     app_log: server1
+
+################
+# Summary
+################
+
+- include: ../../linux-health_checks/tasks/cleanup.yml
+  vars:
+      app_log: server1
+      summ_type: periodic
+
+################
+# URL 
+################
+
+- include: ../../linux-health_checks/tasks/resources_logs.yml
+  vars:
+     log_type: urls
+     app_log: server1
+
+- include: ../../linux-health_checks/tasks/check_urls.yml
+  vars:
+      url_check: "{{ server1_url_check }}"
+      app_log: server1
+      log_type: urls
+
+- include: ../../linux-health_checks/tasks/fetch_logs.yml
+  vars:
+    log_type: urls
+    app_log: server1
+################
+# Memory 
+################
+
+- include: ../../linux-health_checks/tasks/resources_logs.yml
+  vars:
+     log_type: memory
+     app_log: server1
+- include: ../../linux-health_checks/tasks/check_memory.yml
+  vars:
+     app_log: server1
+     log_type: memory
+- include: ../../linux-health_checks/tasks/fetch_logs.yml
+  vars:
+     log_type: memory
+     app_log: server1
+################
+# CPU 
+################
+
+- include: ../../linux-health_checks/tasks/resources_logs.yml
+  vars:
+     log_type: cpu
+     app_log: server1
+
+- include: ../../linux-health_checks/tasks/check_cpu.yml
+  vars:
+     log_type: cpu
+     app_log: server1
+
+- include: ../../linux-health_checks/tasks/fetch_logs.yml
+  vars:
+     log_type: cpu
+     app_log: server1
+################
+# Disk 
+################
+
+- include: ../../linux-health_checks/tasks/resources_logs.yml
+  vars:
+     log_type: disk
+     app_log: server1
+
+- include: ../../linux-health_checks/tasks/check_disk.yml
+  vars:
+     log_type: disk
+     app_log: server1
+
+- include: ../../linux-health_checks/tasks/fetch_logs.yml
+  vars:
+     log_type: disk
+     app_log: server1
+#####################
+# Periodic Summary 
+#####################
+
+- include: ../../linux-health_checks/tasks/period_summary.yml
+  vars:
+      app_log: server1
+      summ_type: periodic    
+

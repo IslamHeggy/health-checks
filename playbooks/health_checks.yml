@@ -1,0 +1,45 @@
+---
+
+- name: common healthcheck
+  hosts: 
+    - 127.0.0.1
+  connection: local
+  remote_user: centos
+  become_user: root
+  become: yes
+  tasks:
+    - include_role:
+         name: linux-health_checks
+         tasks_from: common
+
+- name: server1 healthcheck
+  hosts: server1
+  remote_user: centos
+  become_user: root
+  become: yes
+  gather_facts: True
+  roles:
+    - linux-server1-healthchk 
+
+- name: server2 healthcheck
+  hosts: server2
+  remote_user: centos
+  become_user: root
+  become: yes
+  gather_facts: True
+  roles:
+    - linux-server2-healthchk
+
+
+- name: failure e-mail
+  hosts:
+    - 127.0.0.1 
+  remote_user: centos
+  become_user: root
+  become: yes
+  gather_facts: True
+  tasks:
+    - include_role:
+         name: linux-health_checks
+         tasks_from: send_mail.yml
+

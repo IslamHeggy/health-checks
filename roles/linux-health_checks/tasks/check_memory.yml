@@ -1,0 +1,31 @@
+---
+- name: check free memory
+  shell: "free -m | grep Mem | awk '{ print $3/$2 * 100.0}' "
+  register: mem_stats
+
+- name: echo memory is ok in a new log file
+  shell: |
+    'echo Memory usage is normal with "{{ mem_stats.stdout }}" % on $(date)>> {{ logs_path }}/{{ app_log }}/{{ log_type }}/$(hostname.stdout)_$(date +"%d_%m_%Y").log'
+    echo "{{ app_log }}" Memory usage is normal with "{{ mem_stats.stdout }}" % on $(date) "(OKAY)" >>  {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: mem_stats.stdout < "{{ mem_threshold }}" and (last_date.stdout != curr_date.stdout)
+
+- name: echo memory is in danger in a new log file
+  shell: |
+    'echo Memory usage is above normal with "{{ mem_stats.stdout }}" % on $(date)>> {{ logs_path }}/{{ app_log }}/{{ log_type }}/$(hostname.stdout)_$(date +"%d_%m_%Y").log'
+    echo "{{ app_log }}" Memory usage is above normal with "{{ mem_stats.stdout }}" % on $(date) "(ERROR)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: mem_stats.stdout > "{{ mem_threshold }}" and (last_date.stdout != curr_date.stdout)
+
+
+- name: echo memory is ok in existing log file
+  shell: |
+    echo Memory usage is normal with "{{ mem_stats.stdout }}" % on $(date)>> "{{ latest_file.path }}"
+    echo "{{ app_log }}" Memory usage is normal with "{{ mem_stats.stdout }}" % on $(date) "(OKAY)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: mem_stats.stdout < "{{ mem_threshold }}" and (last_date.stdout == curr_date.stdout)
+
+- name: echo memory is in danger in a new log file
+  shell: |
+    echo Memory usage is above normal with "{{ mem_stats.stdout }}" % on $(date)>>"{{ latest_file.path }}"
+    echo "{{ app_log }}" Memory usage is above normal with "{{ mem_stats.stdout }}" % on $(date) "(ERROR)">> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: mem_stats.stdout > "{{ mem_threshold }}" and (last_date.stdout == curr_date.stdout)
+
+

@@ -1,0 +1,55 @@
+------------------------------------
+{{ environment_var }} Environment
+------------------------------------
+
+Total errors occured during the day are {{ all_result.results.0.stdout }} errors.
+
+------------------
+machine name1 
+------------------
+There were {{ all_result.results.1.stdout }} errors.
+
+url errros: {{ spec_result.results.0.stdout }} errors.
+memory errors: {{ spec_result.results.1.stdout }} errors.
+cpu errors: {{ spec_result.results.2.stdout }} errors.
+disk errors: {{ spec_result.results.3.stdout }} errors.
+
+-------------------
+machine name2
+-------------------
+There were {{ all_result.results.2.stdout }} errors.
+
+url errros: {{ spec_result.results.4.stdout }} errors.
+memory errors: {{ spec_result.results.5.stdout }} errors.
+cpu errors: {{ spec_result.results.6.stdout }} errors.
+disk errors: {{ spec_result.results.7.stdout }} errors.
+
+--------------------
+machine name3 
+--------------------
+There were {{ all_result.results.3.stdout }} errors.
+
+url errros: {{ spec_result.results.8.stdout  }} errors.
+memory errors: {{ spec_result.results.9.stdout  }} errors.
+cpu errors: {{ spec_result.results.10.stdout }} errors.
+disk errors: {{ spec_result.results.11.stdout }} errors.
+
+---------------------
+machine name4 
+----------------------
+There were {{ all_result.results.4.stdout }} errors.
+
+url errros: {{ spec_result.results.12.stdout }} errors.
+memory errors: {{ spec_result.results.13.stdout }} errors.
+cpu errors: {{ spec_result.results.14.stdout }} errors.
+disk errors: {{ spec_result.results.15.stdout }} errors.
+
+-----------------------
+machine name5 
+----------------------
+There were {{ all_result.results.5.stdout }} errors.
+
+url errros: {{ spec_result.results.16.stdout }} errors.
+memory errors: {{ spec_result.results.17.stdout }} errors.
+cpu errors: {{ spec_result.results.18.stdout }} errors.
+disk errors: {{ spec_result.results.19.stdout }} errors.

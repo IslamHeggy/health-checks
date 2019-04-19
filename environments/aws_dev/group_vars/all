@@ -1,0 +1,38 @@
+---
+
+#health check variables 
+mem_threshold: 90
+cpu_threshold: 25 
+health_check_period: 59
+cpu_compute_time: "{{ health_check_period * 60 }}" 
+logs_path: "/opt/health_chks_logs/"
+logs_list:
+- memory
+- cpu
+- urls
+#- logs
+- disk
+- periodic_summary
+environment_var: development
+summary_path: "{{ logs_path }}/{{ environment_var }}/summaries"
+total_summary_items:
+- ERROR
+- server1 
+- server2
+- server3
+- server4
+- server5
+
+total_summary_apps:
+- server1 
+- server2
+- server3
+- server4
+- server5
+
+total_summary_logs:
+- url
+- memory
+- cpu
+#- logs
+- disk

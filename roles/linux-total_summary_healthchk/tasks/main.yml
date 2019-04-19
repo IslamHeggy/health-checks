@@ -1,0 +1,7 @@
+---
+#####################
+# Total Summary 
+#####################
+
+
+- include: ../../linux-health_checks/tasks/total_summary.yml

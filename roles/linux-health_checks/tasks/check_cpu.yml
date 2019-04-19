@@ -1,0 +1,37 @@
+---
+
+
+- name: check empty file 
+  shell: cat {{ latest_file.path }} | wc -l 
+  register: file_check
+
+- name: check cpu usage
+  shell: tail -1 {{ latest_file.path }} | awk '{print $15 " % idle at " $18 " " $19}'
+  register: cpu_stats_str
+
+- block:
+
+  - name: check cpu usage
+    shell: tail -1 {{ latest_file.path }} | awk '{print $15}'
+    register: cpu_stats
+
+  - name: echo normal cpu
+    shell: |
+      echo "{{ app_log }}" cpu is "{{ cpu_stats_str.stdout }}" "(OKAY)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+    when: cpu_stats.stdout|int  > cpu_threshold and cpu_stats.stdout|int != 0
+
+  - name: echo high cpu usage
+    shell: |
+      echo "{{ app_log }}" cpu is in danger with "{{ cpu_stats_str.stdout }}" "(ERROR)" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+    when: cpu_stats.stdout|int < cpu_threshold and cpu_stats.stdout|int != 0
+
+  when: file_check.stdout|int != 0
+
+
+- name: create a background job for the next cpu check with a new file
+  shell: 'nohup vmstat -wt {{ cpu_compute_time }} 2 > "{{ logs_path }}/{{ app_log }}/{{ log_type }}/{{ hostname.stdout }}_$(date +"%d_%m_%Y").log" & '
+  when: (last_date.stdout != curr_date.stdout)
+
+- name: create a background job for the next cpu check with the same file
+  shell: 'nohup vmstat -wt {{ cpu_compute_time }} 2 >> "{{ latest_file.path }}" & '
+  when: last_date.stdout == curr_date.stdout

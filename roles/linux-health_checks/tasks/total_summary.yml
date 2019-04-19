@@ -1,0 +1,44 @@
+---
+
+- name: Get files in a folder
+  find:
+    paths: "{{ logs_path }}/{{ environment_var }}/error_history"
+  register: found_files
+
+- name: Get latest modified file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+
+- name: check total application errors
+  shell: cat "{{ latest_file.path }}" | grep "{{ item }}" | wc -l
+  register: all_result
+  with_items:
+   - "{{ total_summary_items }}"
+
+- name: specify each application error
+  shell: cat "{{ latest_file.path }}" | grep {{ item[0] }} | grep -i  "{{ item[1] }}" | wc -l
+  register: spec_result
+  with_nested:
+    - "{{ total_summary_apps }}"
+    - "{{ total_summary_logs }}"
+
+- name: create the total summary
+  template:
+     src: /apps/ansible/development/roles/linux-health_checks/templates/total_summary.j2
+     dest: "{{ summary_path }}/daily"
+
+- name: rename the file
+  shell: mv {{ summary_path }}/daily/total_summary.j2 {{ summary_path }}/daily/Total_Summary.txt
+
+- name: send a mail with the specified summary
+  shell: printf "Dear LDP Admins, \n\nKindly find the total summary of the {{ environment_var }} environment in the attachment.\n\n"  | mailx -s "{{ environment_var }} Environment Total Summary" -S smtp="" " -a {{ summary_path }}/daily/Total_Summary.txt 
+
+- name: copy summary with a different extension 
+  copy:
+    src: "{{ summary_path }}/daily/Total_Summary.txt"
+    dest: "{{ summary_path }}/daily/Total_Summary.log"
+
+- name: rename the log 
+  shell: mv "{{ summary_path }}/daily/Total_Summary.txt" {{ summary_path }}/daily/$(date +"%d_%m_%Y").log
+

@@ -1,0 +1,8 @@
+---
+
+- name: delete the previous remote period summary
+  file:
+    path: "/opt/health_chks_logs/{{ environment_var }}/summaries/periodic/periodic_summary.log"
+    state: absent
+  delegate_to: localhost
+  tags: clean

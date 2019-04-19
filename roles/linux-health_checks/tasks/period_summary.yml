@@ -1,0 +1,55 @@
+---
+
+- name: fetch created file
+  fetch:
+    src: "{{ logs_path }}/{{ app_log }}/periodic_summary/summary.log"
+    dest: "{{ logs_path }}/{{ environment_var }}/{{ app_log }}/periodic_summary/summary.log"
+    flat: yes
+  tags: test
+
+- name: echo component name and environment
+  shell: |
+     echo {{ app_log }} {{ environment_var }} Machine >> "{{ logs_path }}/{{ environment_var }}/summaries/periodic/periodic_summary.log"
+     echo "--------------------" >> "{{ logs_path }}/{{ environment_var }}/summaries/periodic/periodic_summary.log"
+  delegate_to: localhost
+  tags: test 
+
+- name: echo content of periodic summary to the overall file 
+  shell: cat {{ logs_path }}/{{ environment_var }}/{{ app_log }}/periodic_summary/summary.log >> "{{ logs_path }}/{{ environment_var }}/summaries/periodic/periodic_summary.log"
+  delegate_to: localhost
+  tags: test
+
+- name: Get files in a folder
+  find:
+    paths: "{{ logs_path }}/{{ environment_var }}/error_history"
+  delegate_to: localhost
+  register: found_files
+
+
+- name: Get latest modifed file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+- name: get the current day
+  command: date +"%d"
+  register: curr_date
+
+- name: get the day of the last modfied file
+  shell: "stat -c %y {{ latest_file.path }} | cut -d' ' -f1 | cut -d'-' -f3 "
+  register: last_date
+  delegate_to: localhost
+  ignore_errors: yes
+
+- name: echo content of periodic summary errors to the same error history 
+  shell: cat {{ logs_path }}/{{ environment_var }}/{{ app_log }}/periodic_summary/summary.log | grep "(ERROR)" >> {{ latest_file.path }}
+  delegate_to: localhost
+  ignore_errors: yes 
+  when: last_date.stdout == curr_date.stdout
+ 
+- name: echo content of periodic summary errors to a different error history
+  shell: cat {{ logs_path }}/{{ environment_var }}/{{ app_log }}/periodic_summary/summary.log | grep "(ERROR)" >> {{ logs_path }}/{{ environment_var }}/error_history/error_$(date +"%d_%m_%Y").log
+  delegate_to: localhost
+  ignore_errors: yes
+  when: last_date.stdout != curr_date.stdout
+
+

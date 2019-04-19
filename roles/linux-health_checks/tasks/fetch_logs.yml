@@ -1,0 +1,8 @@
+---
+- name: fetch created "{{ log_type }}" file
+  fetch:
+    src: "{{ latest_file.path }}"
+#    dest: "{{ latest_file.path }}"
+    dest: "{{ logs_path }}/{{ environment_var }}/{{ app_log }}/{{ log_type }}/"
+    flat: yes
+

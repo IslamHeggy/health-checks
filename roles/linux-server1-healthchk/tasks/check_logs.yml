@@ -1,0 +1,19 @@
+---
+- name: grep errors from application log
+  shell: cat /apps/tomcat/logs/catalina.out | grep -i "TopBraid Error" | grep $(date +%Y-%m-%d) | cut -d' ' -f3
+  register: server1_logs
+  ignore_errors: yes 
+
+- name: subtract the current date from the logs date 
+  shell: bc -l <<< date --date="{{ hostvars.localhost.curr_date.stdout }}"-{{ item.stdout }} 
+  with_items:
+      - "{{ server1_logs.results }}"
+  register: sub_result
+  delegate_to: localhost 
+
+- name: check if there were errors at the specified time 
+  shell: grep {{ item.stdout}} 
+  when: item.stdout|int <= cpu_compute_time
+  with_items:
+       - "{{ sub_results }}" 
+  delegate_to: localhost 

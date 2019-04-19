@@ -1,0 +1,17 @@
+---
+- name: check if there were any errors 
+  shell: cat {{ summary_path }}/periodic/periodic_summary.log | grep "(ERROR)" | wc -l 
+  register: error_no
+
+- name: rename the summary file
+  shell: cp {{ summary_path }}/periodic/periodic_summary.log {{ summary_path }}/periodic/periodic_summary.txt
+
+- name: send the periodic summary when errors exist
+  shell: (printf "Dear LDP Admins, \n\nKindly find the below errors and for more information you can find the attached file containing the summary.\n\n" ; cat {{ summary_path }}/periodic/periodic_summary.txt | grep "(ERROR)" )| mailx -s " {{ environment_var }} Environment Healthcheck Error" -S smtp="" -a {{ summary_path }}/periodic/periodic_summary.txt    
+  when: error_no.stdout|int != 0  
+
+
+- name: rename the periodic summary with creation time
+  shell: mv "{{ logs_path }}/{{ environment_var }}/summaries/periodic/periodic_summary.txt" "{{ logs_path }}/{{ environment_var }}/summaries/periodic/$(echo `date --date "$(date) -2 min" | cut -d' ' -f4 | cut -d':' -f1,2`_`date +"%d_%m_%Y"`.log)"
+  delegate_to: localhost
+

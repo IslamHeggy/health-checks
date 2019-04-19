@@ -1,0 +1,32 @@
+---
+- name: echo disk is ok in a new log file 
+  shell: |
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  < 80 {print $1 " filesystem is okay with " $5 " disk usage on", date}'>> "{{ logs_path }}/{{ app_log }}/{{ log_type }}/{{hostname.stdout}}_$(date +"%d_%m_%Y").log"
+    echo "--------------------" >> "{{ logs_path }}/{{ app_log }}/{{ log_type }}/{{hostname.stdout}}_$(date +"%d_%m_%Y").log"
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  < 80 {print "{{ app_log }}" " " $1 " filesystem is okay with " $5 " disk usage on", date " (OKAY)"}'>> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (last_date.stdout != curr_date.stdout)
+
+- name: echo disk space is in danger in a new log file 
+  shell: |
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  >= 80 {print $1 " filesystem is in danger with " $5 " disk usage on", date}'>> "{{ logs_path }}/{{ app_log }}/{{ log_type }}/{{hostname.stdout}}_$(date +"%d_%m_%Y").log"
+    echo "--------------------" >> "{{ logs_path }}/{{ app_log }}/{{ log_type }}/{{hostname.stdout}}_$(date +"%d_%m_%Y").log"
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  >= 80 {print "{{ app_log }}" " " $1 " filesystem is in danger with " $5 " disk usage on", date " (ERROR)"}'>> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (last_date.stdout != curr_date.stdout)
+
+- name: echo disk is okay in exisiting log file 
+  shell: |
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  < 80 {print $1 " filesystem is okay with " $5 " disk usage on", date}'>> "{{ latest_file.path }}"
+    echo "--------------------" >> "{{ latest_file.path }}"    
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  < 80 {print "{{ app_log }}" " " $1 " filesystem is okay with " $5 " disk usage on", date " (OKAY)"}'>> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (last_date.stdout == curr_date.stdout)
+
+- name: echo disk space is in danger in exisiting log file
+  shell: |
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  >= 80 {print $1 " filesystem is in danger  with " $5 " disk usage on", date}'>> "{{ latest_file.path }}"
+    echo "--------------------" >> "{{ latest_file.path }}"    
+    df -P | sed -n '1!p' | awk -v date="$(date)" '0+$5  >= 80 {print "{{ app_log }}" " "$1 " filesystem is in danger  with " $5 " disk usage on", date " (ERROR)"}'>> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+  when: (last_date.stdout == curr_date.stdout)
+
+- name: echo a new line in the summary file 
+  shell: echo "--------------------" >> {{ logs_path }}/{{ app_log }}/periodic_summary/summary.log
+
